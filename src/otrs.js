@@ -3,9 +3,8 @@ angular.module("ovh-angular-otrs")
         "use strict";
         $stateProvider.state("otrs-list", {
             url: "/support",
-            templateUrl: "app/module-otrs/otrs.html",
-            controller: "OtrsCtrl",
-            controllerAs: "OtrsCtrl",
-            translations: ["common", "module-otrs"]
+            controller: function ($window, MANAGER_URLS) {
+                $window.open(MANAGER_URLS.dedicated + "ticket", "_self");
+            }
         });
     });
