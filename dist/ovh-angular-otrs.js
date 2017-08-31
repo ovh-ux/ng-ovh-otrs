@@ -623,11 +623,19 @@ angular.module("ovh-angular-otrs").controller("OtrsCtrl", ["$scope", "$timeout",
 angular.module("ovh-angular-otrs")
     .config(["$stateProvider", function ($stateProvider) {
         "use strict";
-        $stateProvider.state("otrs-list", {
+
+        var dedicatedManagerRedirect = function ($window) {
+            $window.open("/manager/dedicated/index.html#/ticket", "_self");
+        };
+        dedicatedManagerRedirect.$inject = ["$window"];
+        $stateProvider.state("otrs-list1", {
             url: "/support",
-            controller: ["$window", "MANAGER_URLS", function ($window, MANAGER_URLS) {
-                $window.open(MANAGER_URLS.dedicated + "ticket", "_self");
-            }]
+            controller: dedicatedManagerRedirect
+        });
+
+        $stateProvider.state("otrs-list2", {
+            url: "/ticket",
+            controller: dedicatedManagerRedirect
         });
     }]);
 
