@@ -79,6 +79,10 @@ angular.module("ovh-angular-otrs").controller("OtrsPopupCtrl", ["$rootScope", "$
         }
     });
 
+    $rootScope.$on("ticket.otrs.changeTicket", function (event, newTicket) {
+        _.assign(self.ticket, newTicket);
+    });
+
     self.sendTicket = function () {
         if (!self.loaders.send && self.ticket.body) {
             self.loaders.send = true;
@@ -294,6 +298,15 @@ angular.module("ovh-angular-otrs")
             return isLoaded;
         };
 
+        /**
+         * Changes the content of the ticket
+         * @param {object} ticket The ticket
+         * @param {object} ticket.body The ticket body content
+         * @param {object} ticket.subject The subject of the ticket
+         */
+        this.changeTicket = function (ticket) {
+            $rootScope.$broadcast("ticket.otrs.changeTicket", ticket);
+        };
     }]);
 
 angular.module("ovh-angular-otrs").constant("TICKET_CATEGORIES", {

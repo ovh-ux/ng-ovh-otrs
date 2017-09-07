@@ -31,4 +31,13 @@ angular.module("ovh-angular-otrs")
             return isLoaded;
         };
 
+        /**
+         * Changes the content of the ticket
+         * @param {object} ticket The ticket
+         * @param {object} ticket.body The ticket body content
+         * @param {object} ticket.subject The subject of the ticket
+         */
+        this.changeTicket = function (ticket) {
+            $rootScope.$broadcast("ticket.otrs.changeTicket", ticket);
+        };
     });
