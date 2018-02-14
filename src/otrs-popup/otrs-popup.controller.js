@@ -27,6 +27,10 @@ angular.module("ovh-angular-otrs").controller("OtrsPopupCtrl", function ($rootSc
         }
     });
 
+    $rootScope.$on("ticket.otrs.changeTicket", function (event, newTicket) {
+        _.assign(self.ticket, newTicket);
+    });
+
     self.sendTicket = function () {
         if (!self.loaders.send && self.ticket.body) {
             self.loaders.send = true;
