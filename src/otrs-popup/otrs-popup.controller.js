@@ -1,6 +1,6 @@
 angular.module("ovh-angular-otrs").controller("OtrsPopupCtrl", function ($q, $rootScope, $scope, $stateParams, $transitions, $translate,
                                                                          OvhApiMe, OvhApiMeVipStatus, OvhApiProductsAapi, OvhApiSupport,
-                                                                         Alerter, constants, featureAvailability, OtrsPopupService, OtrsPopupInterventionService,
+                                                                         OtrsPopupService, OtrsPopupInterventionService,
                                                                          OTRS_POPUP_ASSISTANCE_ENUM, OTRS_POPUP_BILLING_ENUM, OTRS_POPUP_CATEGORIES, OTRS_POPUP_INCIDENT_ENUM, OTRS_POPUP_INTERVENTION_ENUM, OTRS_POPUP_SERVICES, OTRS_POPUP_UNIVERSES,
                                                                          TICKET_CATEGORIES, UNIVERSE) {
     "use strict";
@@ -49,7 +49,6 @@ angular.module("ovh-angular-otrs").controller("OtrsPopupCtrl", function ($q, $ro
                 }],
                 inverse: false
             },
-            guides: {},
             hasMegaRaid: false,
             slotInfo: {},
             enums: {
@@ -126,7 +125,7 @@ angular.module("ovh-angular-otrs").controller("OtrsPopupCtrl", function ($q, $ro
                 self.ticket.category = TICKET_CATEGORIES.DEFAULT;
             }
 
-            return OvhApiSupport.Lexi()
+            return OvhApiSupport.v6()
                 .create(self.ticket).$promise
                 .then(function (data) {
                     initFields();
@@ -179,7 +178,6 @@ angular.module("ovh-angular-otrs").controller("OtrsPopupCtrl", function ($q, $ro
                     }
                 }).finally(function () {
                     self.loaders.send = false;
-                    self.refreshFAQ();
                     self.refreshRequests();
                     self.setForm("start");
                 });
@@ -198,55 +196,8 @@ angular.module("ovh-angular-otrs").controller("OtrsPopupCtrl", function ($q, $ro
         return _.first(_.map(getSelectedService(), "name")) === "SERVER";
     }
 
-    self.refreshFAQ = function () {
-        self.faq = {};
-
-        var serviceCategory = "";
-
-        if (self.services.choice) {
-            serviceCategory = self.services.choice.category;
-        }
-
-        if (self.ticket.serviceName) {
-            serviceCategory = _.first(_.map(getSelectedService(), "name"));
-        }
-
-        switch (serviceCategory) {
-        case self.servicesValues.DOMAIN:
-        case self.servicesValues.HOSTING:
-        case self.servicesValues.EMAIL:
-        case self.servicesValues.ZONE:
-        case self.servicesValues.SQL:
-            self.faq.url = constants.urls.FAQS.WEB.URL[self.currentUser.ovhSubsidiary];
-            self.faq.title = constants.urls.FAQS.WEB.TITLE;
-            break;
-        case self.servicesValues.EXCHANGE:
-            self.faq.url = constants.urls.FAQS.EXCHANGE.URL[self.currentUser.ovhSubsidiary];
-            self.faq.title = constants.urls.FAQS.EXCHANGE.TITLE;
-            break;
-        case self.servicesValues.OFFICE_365:
-            self.faq.url = constants.urls.FAQS.OFFICE_365.URL[self.currentUser.ovhSubsidiary];
-            self.faq.title = constants.urls.FAQS.OFFICE_365.TITLE;
-            break;
-        case self.servicesValues.DEDICATED:
-        case "SERVER":
-            self.faq.url = constants.urls[self.currentUser.ovhSubsidiary].faq;
-            self.faq.title = "otrs_popup_service_faq_sd";
-            break;
-        case self.servicesValues.VPS:
-            self.faq.url = constants.urls[self.currentUser.ovhSubsidiary].faqVps;
-            self.faq.title = "otrs_popup_service_faq_vps";
-            break;
-        default:
-            break;
-        }
-
-        return self.faq;
-    };
-
     self.refreshRequests = function () {
-        if (featureAvailability.allowDedicatedServerHardwareReplacement() && isSelectedChoiceDedicatedServer() &&
-            !_.includes(self.requests, self.intervention.request)) {
+        if (isSelectedChoiceDedicatedServer() && !_.includes(self.requests, self.intervention.request)) {
             self.requests.push(self.intervention.request);
         } else if (!isSelectedChoiceDedicatedServer()) {
             _.remove(self.requests, function (req) {
@@ -295,10 +246,6 @@ angular.module("ovh-angular-otrs").controller("OtrsPopupCtrl", function ($q, $ro
         self.intervention.disk.disks.splice(item, 1);
     };
 
-    self.productHasFaq = function () {
-        return self.faq && self.faq.url && self.currentUser.ovhSubsidiary !== "US";
-    };
-
     self.setForm = function (formDetails) {
         self.formDetails = formDetails;
     };
@@ -316,23 +263,6 @@ angular.module("ovh-angular-otrs").controller("OtrsPopupCtrl", function ($q, $ro
         }
     };
 
-    $scope.$watch("OtrsPopupCtrl.intervention.serviceName", function (server, oldServer) {
-        if (server && server !== oldServer) {
-            self.services.choice = self.intervention.serviceName;
-            getServerInfo();
-        }
-    });
-
-    $scope.$watch("OtrsPopupCtrl.ticket.serviceName", function () {
-        self.refreshFAQ();
-        self.refreshFormDetails();
-        self.refreshRequests();
-    });
-
-    $scope.$watch("OtrsPopupCtrl.ticket.subcategory", function () {
-        self.refreshFormDetails();
-    });
-
     this.$onInit = function () {
 
         initFields();
@@ -343,7 +273,6 @@ angular.module("ovh-angular-otrs").controller("OtrsPopupCtrl", function ($q, $ro
             message: null
         };
 
-        self.faq = null;
         self.servicesValues = OTRS_POPUP_SERVICES;
         self.formDetails = "start";
         self.interventionEnum = OTRS_POPUP_INTERVENTION_ENUM;
@@ -351,11 +280,11 @@ angular.module("ovh-angular-otrs").controller("OtrsPopupCtrl", function ($q, $ro
         // hide alert
         manageAlert();
 
-        $q.all({
+        return $q.all({
             services: self.getServices(),
-            me: OvhApiMe.Lexi().get().$promise,
-            meVipStatus: OvhApiMeVipStatus.Lexi().get().$promise,
-            supportSchema: OvhApiSupport.Lexi().schema().$promise
+            me: OvhApiMe.v6().get().$promise,
+            meVipStatus: OvhApiMeVipStatus.v6().get().$promise,
+            supportSchema: OvhApiSupport.v6().schema().$promise
         }).then(function (results) {
             self.currentUser = results.me;
 
@@ -396,13 +325,20 @@ angular.module("ovh-angular-otrs").controller("OtrsPopupCtrl", function ($q, $ro
                 self.ticket.product = self.categories[0];
             }
 
-            if (self.currentUser && _.has(constants.urls, [self.currentUser.ovhSubsidiary, "guides"])) {
-                self.intervention.guides = {
-                    diskSerial: constants.urls[self.currentUser.ovhSubsidiary].guides.diskSerial || constants.urls.FR.guides.diskSerial,
-                    noMegaRaidLED: constants.urls[self.currentUser.ovhSubsidiary].guides.noMegaRaidLED || constants.urls.FR.guides.noMegaRaidLED,
-                    megaRaidLED: constants.urls[self.currentUser.ovhSubsidiary].guides.megaRaidLED || constants.urls.FR.guides.megaRaidLED
-                };
-            }
+            $scope.$watch("OtrsPopupCtrl.intervention.serviceName", function (server, oldServer) {
+                if (server && server !== oldServer) {
+                    getServerInfo();
+                }
+            });
+
+            $scope.$watch("OtrsPopupCtrl.ticket.serviceName", function () {
+                self.refreshFormDetails();
+                self.refreshRequests();
+            });
+
+            $scope.$watch("OtrsPopupCtrl.ticket.subcategory", function () {
+                self.refreshFormDetails();
+            });
         })
             .catch(function (err) { manageAlert([($translate.instant("otrs_err_get_infos"), err.data && err.data.message) || ""].join(" "), "danger"); })
             .finally(function () { self.loaders.models = false; });

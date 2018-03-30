@@ -1,12 +1,8 @@
 angular.module("ovh-angular-otrs")
-    .service("OtrsPopupInterventionService", function ($q, OvhHttp) {
+    .service("OtrsPopupInterventionService", function ($q, OvhApiDedicatedServer) {
         "use strict";
 
         var self = this;
-
-        var cacheServer = {
-            all: "UNIVERS_DEDICATED_SERVER"
-        };
 
         self.sendDiskReplacement = function (serviceName, disk) {
             var diskToSend = _.assign({}, disk);
@@ -15,13 +11,13 @@ angular.module("ovh-angular-otrs")
                 diskToSend.comment = "No message";
             }
 
-            return OvhHttp.post("/dedicated/server/{serviceName}/support/replace/hardDiskDrive", {
-                rootPath: "apiv6",
-                urlParams: {
-                    serviceName: serviceName
-                },
-                data: diskToSend
-            });
+            return OvhApiDedicatedServer.v6().askHardDiskDriveReplacement({
+                serverName: serviceName
+            }, {
+                comment: diskToSend.comment,
+                disks: diskToSend.disks,
+                inverse: diskToSend.inverse
+            }).$promise;
         };
 
         self.getServerInterventionInfo = function (serviceName) {
@@ -38,22 +34,15 @@ angular.module("ovh-angular-otrs")
         };
 
         function getServerInfo (serviceName) {
-            return OvhHttp.get("/dedicated/server/{serviceName}", {
-                rootPath: "apiv6",
-                urlParams: {
-                    serviceName: serviceName
-                },
-                cache: cacheServer.all
-            });
+            return OvhApiDedicatedServer.v6().get({
+                serverName: serviceName
+            }).$promise;
         }
 
         function getHardwareInfo (serviceName) {
-            return OvhHttp.get("/dedicated/server/{serviceName}/specifications/hardware", {
-                rootPath: "apiv6",
-                urlParams: {
-                    serviceName: serviceName
-                }
-            });
+            return OvhApiDedicatedServer.v6().getHardware({
+                serverName: serviceName
+            }).$promise;
         }
 
         function canHotSwap (serverInfo, hardwareInfo) {

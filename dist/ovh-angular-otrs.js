@@ -1,14 +1,10 @@
 angular.module("ovh-angular-otrs", ["ovh-api-services", "ovh-angular-toaster", "ovh-jquery-ui-draggable-ng"]);
 
 angular.module("ovh-angular-otrs")
-    .service("OtrsPopupInterventionService", ["$q", "OvhHttp", function ($q, OvhHttp) {
+    .service("OtrsPopupInterventionService", ["$q", "OvhApiDedicatedServer", function ($q, OvhApiDedicatedServer) {
         "use strict";
 
         var self = this;
-
-        var cacheServer = {
-            all: "UNIVERS_DEDICATED_SERVER"
-        };
 
         self.sendDiskReplacement = function (serviceName, disk) {
             var diskToSend = _.assign({}, disk);
@@ -17,13 +13,13 @@ angular.module("ovh-angular-otrs")
                 diskToSend.comment = "No message";
             }
 
-            return OvhHttp.post("/dedicated/server/{serviceName}/support/replace/hardDiskDrive", {
-                rootPath: "apiv6",
-                urlParams: {
-                    serviceName: serviceName
-                },
-                data: diskToSend
-            });
+            return OvhApiDedicatedServer.v6().askHardDiskDriveReplacement({
+                serverName: serviceName
+            }, {
+                comment: diskToSend.comment,
+                disks: diskToSend.disks,
+                inverse: diskToSend.inverse
+            }).$promise;
         };
 
         self.getServerInterventionInfo = function (serviceName) {
@@ -40,22 +36,15 @@ angular.module("ovh-angular-otrs")
         };
 
         function getServerInfo (serviceName) {
-            return OvhHttp.get("/dedicated/server/{serviceName}", {
-                rootPath: "apiv6",
-                urlParams: {
-                    serviceName: serviceName
-                },
-                cache: cacheServer.all
-            });
+            return OvhApiDedicatedServer.v6().get({
+                serverName: serviceName
+            }).$promise;
         }
 
         function getHardwareInfo (serviceName) {
-            return OvhHttp.get("/dedicated/server/{serviceName}/specifications/hardware", {
-                rootPath: "apiv6",
-                urlParams: {
-                    serviceName: serviceName
-                }
-            });
+            return OvhApiDedicatedServer.v6().getHardware({
+                serverName: serviceName
+            }).$promise;
         }
 
         function canHotSwap (serverInfo, hardwareInfo) {
@@ -127,9 +116,9 @@ angular.module("ovh-angular-otrs")
         US: ["CLOUD_DEDICATED"]
     });
 
-angular.module("ovh-angular-otrs").controller("OtrsPopupCtrl", ["$q", "$rootScope", "$scope", "$stateParams", "$transitions", "$translate", "OvhApiMe", "OvhApiMeVipStatus", "OvhApiProductsAapi", "OvhApiSupport", "Alerter", "constants", "featureAvailability", "OtrsPopupService", "OtrsPopupInterventionService", "OTRS_POPUP_ASSISTANCE_ENUM", "OTRS_POPUP_BILLING_ENUM", "OTRS_POPUP_CATEGORIES", "OTRS_POPUP_INCIDENT_ENUM", "OTRS_POPUP_INTERVENTION_ENUM", "OTRS_POPUP_SERVICES", "OTRS_POPUP_UNIVERSES", "TICKET_CATEGORIES", "UNIVERSE", function ($q, $rootScope, $scope, $stateParams, $transitions, $translate,
+angular.module("ovh-angular-otrs").controller("OtrsPopupCtrl", ["$q", "$rootScope", "$scope", "$stateParams", "$transitions", "$translate", "OvhApiMe", "OvhApiMeVipStatus", "OvhApiProductsAapi", "OvhApiSupport", "OtrsPopupService", "OtrsPopupInterventionService", "OTRS_POPUP_ASSISTANCE_ENUM", "OTRS_POPUP_BILLING_ENUM", "OTRS_POPUP_CATEGORIES", "OTRS_POPUP_INCIDENT_ENUM", "OTRS_POPUP_INTERVENTION_ENUM", "OTRS_POPUP_SERVICES", "OTRS_POPUP_UNIVERSES", "TICKET_CATEGORIES", "UNIVERSE", function ($q, $rootScope, $scope, $stateParams, $transitions, $translate,
                                                                          OvhApiMe, OvhApiMeVipStatus, OvhApiProductsAapi, OvhApiSupport,
-                                                                         Alerter, constants, featureAvailability, OtrsPopupService, OtrsPopupInterventionService,
+                                                                         OtrsPopupService, OtrsPopupInterventionService,
                                                                          OTRS_POPUP_ASSISTANCE_ENUM, OTRS_POPUP_BILLING_ENUM, OTRS_POPUP_CATEGORIES, OTRS_POPUP_INCIDENT_ENUM, OTRS_POPUP_INTERVENTION_ENUM, OTRS_POPUP_SERVICES, OTRS_POPUP_UNIVERSES,
                                                                          TICKET_CATEGORIES, UNIVERSE) {
     "use strict";
@@ -178,7 +167,6 @@ angular.module("ovh-angular-otrs").controller("OtrsPopupCtrl", ["$q", "$rootScop
                 }],
                 inverse: false
             },
-            guides: {},
             hasMegaRaid: false,
             slotInfo: {},
             enums: {
@@ -255,7 +243,7 @@ angular.module("ovh-angular-otrs").controller("OtrsPopupCtrl", ["$q", "$rootScop
                 self.ticket.category = TICKET_CATEGORIES.DEFAULT;
             }
 
-            return OvhApiSupport.Lexi()
+            return OvhApiSupport.v6()
                 .create(self.ticket).$promise
                 .then(function (data) {
                     initFields();
@@ -308,7 +296,6 @@ angular.module("ovh-angular-otrs").controller("OtrsPopupCtrl", ["$q", "$rootScop
                     }
                 }).finally(function () {
                     self.loaders.send = false;
-                    self.refreshFAQ();
                     self.refreshRequests();
                     self.setForm("start");
                 });
@@ -327,55 +314,8 @@ angular.module("ovh-angular-otrs").controller("OtrsPopupCtrl", ["$q", "$rootScop
         return _.first(_.map(getSelectedService(), "name")) === "SERVER";
     }
 
-    self.refreshFAQ = function () {
-        self.faq = {};
-
-        var serviceCategory = "";
-
-        if (self.services.choice) {
-            serviceCategory = self.services.choice.category;
-        }
-
-        if (self.ticket.serviceName) {
-            serviceCategory = _.first(_.map(getSelectedService(), "name"));
-        }
-
-        switch (serviceCategory) {
-        case self.servicesValues.DOMAIN:
-        case self.servicesValues.HOSTING:
-        case self.servicesValues.EMAIL:
-        case self.servicesValues.ZONE:
-        case self.servicesValues.SQL:
-            self.faq.url = constants.urls.FAQS.WEB.URL[self.currentUser.ovhSubsidiary];
-            self.faq.title = constants.urls.FAQS.WEB.TITLE;
-            break;
-        case self.servicesValues.EXCHANGE:
-            self.faq.url = constants.urls.FAQS.EXCHANGE.URL[self.currentUser.ovhSubsidiary];
-            self.faq.title = constants.urls.FAQS.EXCHANGE.TITLE;
-            break;
-        case self.servicesValues.OFFICE_365:
-            self.faq.url = constants.urls.FAQS.OFFICE_365.URL[self.currentUser.ovhSubsidiary];
-            self.faq.title = constants.urls.FAQS.OFFICE_365.TITLE;
-            break;
-        case self.servicesValues.DEDICATED:
-        case "SERVER":
-            self.faq.url = constants.urls[self.currentUser.ovhSubsidiary].faq;
-            self.faq.title = "otrs_popup_service_faq_sd";
-            break;
-        case self.servicesValues.VPS:
-            self.faq.url = constants.urls[self.currentUser.ovhSubsidiary].faqVps;
-            self.faq.title = "otrs_popup_service_faq_vps";
-            break;
-        default:
-            break;
-        }
-
-        return self.faq;
-    };
-
     self.refreshRequests = function () {
-        if (featureAvailability.allowDedicatedServerHardwareReplacement() && isSelectedChoiceDedicatedServer() &&
-            !_.includes(self.requests, self.intervention.request)) {
+        if (isSelectedChoiceDedicatedServer() && !_.includes(self.requests, self.intervention.request)) {
             self.requests.push(self.intervention.request);
         } else if (!isSelectedChoiceDedicatedServer()) {
             _.remove(self.requests, function (req) {
@@ -424,10 +364,6 @@ angular.module("ovh-angular-otrs").controller("OtrsPopupCtrl", ["$q", "$rootScop
         self.intervention.disk.disks.splice(item, 1);
     };
 
-    self.productHasFaq = function () {
-        return self.faq && self.faq.url && self.currentUser.ovhSubsidiary !== "US";
-    };
-
     self.setForm = function (formDetails) {
         self.formDetails = formDetails;
     };
@@ -445,23 +381,6 @@ angular.module("ovh-angular-otrs").controller("OtrsPopupCtrl", ["$q", "$rootScop
         }
     };
 
-    $scope.$watch("OtrsPopupCtrl.intervention.serviceName", function (server, oldServer) {
-        if (server && server !== oldServer) {
-            self.services.choice = self.intervention.serviceName;
-            getServerInfo();
-        }
-    });
-
-    $scope.$watch("OtrsPopupCtrl.ticket.serviceName", function () {
-        self.refreshFAQ();
-        self.refreshFormDetails();
-        self.refreshRequests();
-    });
-
-    $scope.$watch("OtrsPopupCtrl.ticket.subcategory", function () {
-        self.refreshFormDetails();
-    });
-
     this.$onInit = function () {
 
         initFields();
@@ -472,7 +391,6 @@ angular.module("ovh-angular-otrs").controller("OtrsPopupCtrl", ["$q", "$rootScop
             message: null
         };
 
-        self.faq = null;
         self.servicesValues = OTRS_POPUP_SERVICES;
         self.formDetails = "start";
         self.interventionEnum = OTRS_POPUP_INTERVENTION_ENUM;
@@ -480,11 +398,11 @@ angular.module("ovh-angular-otrs").controller("OtrsPopupCtrl", ["$q", "$rootScop
         // hide alert
         manageAlert();
 
-        $q.all({
+        return $q.all({
             services: self.getServices(),
-            me: OvhApiMe.Lexi().get().$promise,
-            meVipStatus: OvhApiMeVipStatus.Lexi().get().$promise,
-            supportSchema: OvhApiSupport.Lexi().schema().$promise
+            me: OvhApiMe.v6().get().$promise,
+            meVipStatus: OvhApiMeVipStatus.v6().get().$promise,
+            supportSchema: OvhApiSupport.v6().schema().$promise
         }).then(function (results) {
             self.currentUser = results.me;
 
@@ -525,13 +443,20 @@ angular.module("ovh-angular-otrs").controller("OtrsPopupCtrl", ["$q", "$rootScop
                 self.ticket.product = self.categories[0];
             }
 
-            if (self.currentUser && _.has(constants.urls, [self.currentUser.ovhSubsidiary, "guides"])) {
-                self.intervention.guides = {
-                    diskSerial: constants.urls[self.currentUser.ovhSubsidiary].guides.diskSerial || constants.urls.FR.guides.diskSerial,
-                    noMegaRaidLED: constants.urls[self.currentUser.ovhSubsidiary].guides.noMegaRaidLED || constants.urls.FR.guides.noMegaRaidLED,
-                    megaRaidLED: constants.urls[self.currentUser.ovhSubsidiary].guides.megaRaidLED || constants.urls.FR.guides.megaRaidLED
-                };
-            }
+            $scope.$watch("OtrsPopupCtrl.intervention.serviceName", function (server, oldServer) {
+                if (server && server !== oldServer) {
+                    getServerInfo();
+                }
+            });
+
+            $scope.$watch("OtrsPopupCtrl.ticket.serviceName", function () {
+                self.refreshFormDetails();
+                self.refreshRequests();
+            });
+
+            $scope.$watch("OtrsPopupCtrl.ticket.subcategory", function () {
+                self.refreshFormDetails();
+            });
         })
             .catch(function (err) { manageAlert([($translate.instant("otrs_err_get_infos"), err.data && err.data.message) || ""].join(" "), "danger"); })
             .finally(function () { self.loaders.models = false; });
@@ -551,7 +476,7 @@ angular.module("ovh-angular-otrs")
                 $scope.status = {
                     minimize: false,
                     maximize: false,
-                    close: false
+                    close: true
                 };
 
                 $scope.minimize = function () {
@@ -580,6 +505,11 @@ angular.module("ovh-angular-otrs")
                     }
                 };
 
+                $scope.open = function () {
+                    $scope.restore();
+                    $scope.status.close = false;
+                };
+
                 $scope.close = function () {
                     $scope.restore();
                     $scope.status.close = true;
@@ -589,18 +519,18 @@ angular.module("ovh-angular-otrs")
                 $scope.$on("otrs.popup.minimize", $scope.minimize);
                 $scope.$on("otrs.popup.restore", $scope.restore);
                 $scope.$on("otrs.popup.toggle", $scope.toggle);
+                $scope.$on("otrs.popup.open", $scope.open);
                 $scope.$on("otrs.popup.close", $scope.close);
             }
         };
     });
 
-
 angular.module("ovh-angular-otrs")
-    .service("OtrsPopupService", ["$rootScope", "$compile", function ($rootScope, $compile) {
+    .service("OtrsPopupService", ["$rootScope", function ($rootScope) {
         "use strict";
 
         var self = this;
-        var actions = ["minimize", "maximize", "restore", "close"];
+        var actions = ["minimize", "maximize", "restore", "close", "open"];
         var isLoaded = false;
 
         angular.forEach(actions, function (action) {
@@ -610,18 +540,16 @@ angular.module("ovh-angular-otrs")
         });
 
         this.toggle = function () {
-            if ($("[otrs-popup] .draggable").hasClass("close")) {
-                self.restore();
+            if ($("[data-otrs-popup] .draggable").hasClass("close")) {
+                self.open();
             } else {
                 self.close();
             }
         };
 
         this.init = function () {
-            $compile("<div otrs-popup></div>")($rootScope, function (el) {
-                $("body").append(el);
-                isLoaded = true;
-            });
+            self.open();
+            isLoaded = true;
         };
 
         this.isLoaded = function () {
@@ -678,19 +606,17 @@ angular.module('ovh-angular-otrs').run(['$templateCache', function($templateCach
     "        'minimize': status.minimize,\n" +
     "        'maximize': status.maximize,\n" +
     "        'close': status.close\n" +
-    "    }\"><div data-ng-controller=\"OtrsPopupCtrl as OtrsPopupCtrl\"><div class=draggable-header id=headerPopup><span data-ng-if=\"OtrsPopupCtrl.formDetails === 'replacement-disk'\" data-translate=otrs_popup_intervention></span> <span data-ng-if=\"OtrsPopupCtrl.formDetails !== 'replacement-disk'\" data-translate=otrs_popup_title></span><div class=\"otrs_popup_tools float-right\"><button type=button aria-label=\"{{:: 'otrs_popup_icon_minimize' | translate }}\" data-ng-click=minimize()><span class=\"fa fa-window-minimize\" aria-hidden=true></span></button> <button type=button aria-label=\"{{:: 'otrs_popup_icon_maximize' | translate }}\" data-ng-click=toggle()><span class=\"fa fa-window-maximize\" aria-hidden=true></span></button> <button type=button aria-label=\"{{:: 'otrs_popup_icon_close' | translate }}\" data-ng-click=close()><span class=\"fa fa-close\" aria-hidden=true></span></button></div></div><div id=contentPopup><p class=\"text-center font-italic\" data-translate=otrs_popup_move></p><p class=\"text-center font-italic\" data-ng-if=OtrsPopupCtrl.isVIP data-translate=otrs_vip_phone></p><div class=\"alert alert-dismissible\" role=alert data-ng-class=\"'alert-' + OtrsPopupCtrl.alert.type\" data-ng-if=OtrsPopupCtrl.alert.visible><button type=button class=close data-dismiss=alert aria-label=Close><span aria-hidden=true>&times;</span></button><p data-ng-bind-html=OtrsPopupCtrl.alert.message></p></div><form id=otrsPopupForm name=OtrsPopupCtrl.otrsPopupForm novalidate data-ng-hide=\"OtrsPopupCtrl.formDetails === 'replacement-disk'\" data-ng-submit=OtrsPopupCtrl.sendTicket()><div class=form-group data-ng-if=\"OtrsPopupCtrl.universes.length > 1\"><label for=select-universe class=control-label data-translate=otrs_universe_choice></label><select class=form-control id=select-universe name=select-universe required data-ng-model=OtrsPopupCtrl.selectedUniverse data-ng-options=\"universe as ( 'otrs_universe_'+ universe | translate ) for universe in OtrsPopupCtrl.universes\" data-ng-change=OtrsPopupCtrl.getServices()></select></div><div class=form-group><label for=select-services class=control-label><span data-translate=otrs_popup_service></span><oui-spinner data-ng-show=OtrsPopupCtrl.loaders.services data-size=s></oui-spinner></label><select class=form-control id=select-services name=select-services required data-ng-model=OtrsPopupCtrl.ticket.serviceName data-ng-disabled=OtrsPopupCtrl.loaders.services><optgroup label=\"{{ category.translatedName }}\" data-ng-repeat=\"category in OtrsPopupCtrl.services track by $index\"><option value=\"{{ service.serviceName }}\" data-ng-repeat=\"service in category.services track by $index\" data-ng-bind=service.displayName></option></optgroup></select><small data-ng-show=OtrsPopupCtrl.productHasFaq() data-translate=otrs_popup_see_faq data-translate-values=\"{\n" +
+    "    }\"><div data-ng-controller=\"OtrsPopupCtrl as OtrsPopupCtrl\"><div class=draggable-header id=headerPopup><span data-ng-if=\"OtrsPopupCtrl.formDetails === 'replacement-disk'\" data-translate=otrs_popup_intervention></span> <span data-ng-if=\"OtrsPopupCtrl.formDetails !== 'replacement-disk'\" data-translate=otrs_popup_title></span><div class=\"otrs_popup_tools float-right\"><button type=button aria-label=\"{{:: 'otrs_popup_icon_minimize' | translate }}\" data-ng-click=\"status.minimize ? restore() : minimize()\"><span class=\"fa fa-window-minimize\" aria-hidden=true></span></button> <button type=button aria-label=\"{{:: 'otrs_popup_icon_maximize' | translate }}\" data-ng-click=\"status.maximize ? restore() : maximize()\"><span class=\"fa fa-window-maximize\" aria-hidden=true></span></button> <button type=button aria-label=\"{{:: 'otrs_popup_icon_close' | translate }}\" data-ng-click=close()><span class=\"fa fa-close\" aria-hidden=true></span></button></div></div><div id=contentPopup><p class=\"text-center font-italic\" data-translate=otrs_popup_move></p><p class=\"text-center font-italic\" data-ng-if=OtrsPopupCtrl.isVIP data-translate=otrs_vip_phone></p><div class=\"alert alert-dismissible\" role=alert data-ng-class=\"'alert-' + OtrsPopupCtrl.alert.type\" data-ng-if=OtrsPopupCtrl.alert.visible><button type=button class=close data-dismiss=alert aria-label=Close><span aria-hidden=true>&times;</span></button><p data-ng-bind-html=OtrsPopupCtrl.alert.message></p></div><form id=otrsPopupForm name=OtrsPopupCtrl.otrsPopupForm novalidate data-ng-hide=\"OtrsPopupCtrl.formDetails === 'replacement-disk'\" data-ng-submit=OtrsPopupCtrl.sendTicket()><div class=form-group data-ng-if=\"OtrsPopupCtrl.universes.length > 1\"><label for=select-universe class=control-label data-translate=otrs_universe_choice></label><select class=form-control id=select-universe name=select-universe required data-ng-model=OtrsPopupCtrl.selectedUniverse data-ng-options=\"universe as ( 'otrs_universe_'+ universe | translate ) for universe in OtrsPopupCtrl.universes\" data-ng-change=OtrsPopupCtrl.getServices()></select></div><div class=form-group><label for=select-services class=control-label><span data-translate=otrs_popup_service></span><oui-spinner data-ng-show=OtrsPopupCtrl.loaders.services data-size=s></oui-spinner></label><select class=form-control id=select-services name=select-services required data-ng-model=OtrsPopupCtrl.ticket.serviceName data-ng-disabled=OtrsPopupCtrl.loaders.services><optgroup label=\"{{ category.translatedName }}\" data-ng-repeat=\"category in OtrsPopupCtrl.services track by $index\"><option value=\"{{ service.serviceName }}\" data-ng-repeat=\"service in category.services track by $index\" data-ng-bind=service.displayName></option></optgroup></select><small data-ng-show=OtrsPopupCtrl.productHasFaq() data-translate=otrs_popup_see_faq data-translate-values=\"{\n" +
     "                               url: OtrsPopupCtrl.faq.url\n" +
     "                           }\"></small></div><div class=form-group data-ng-if=OtrsPopupCtrl.isVIP><label for=select-types class=control-label><span data-translate=otrs_popup_type></span><oui-spinner data-ng-show=OtrsPopupCtrl.loaders.models data-size=s></oui-spinner></label><select class=form-control id=select-types name=select-types data-ng-model=OtrsPopupCtrl.ticket.type data-ng-options=\"type as ( 'otrs_types_'+type | translate ) for type in OtrsPopupCtrl.types\" data-ng-disabled=OtrsPopupCtrl.loaders.models></select></div><div class=form-group><label for=select-requests class=control-label><span data-translate=otrs_category_choice></span><oui-spinner data-ng-show=OtrsPopupCtrl.loaders.models data-size=s></oui-spinner></label><select class=form-control id=select-requests name=select-requests required data-ng-model=OtrsPopupCtrl.ticket.category data-ng-options=\"request as ( 'otrs_category_'+request | translate ) for request in OtrsPopupCtrl.requests\" data-ng-disabled=OtrsPopupCtrl.loaders.models></select></div><div class=form-group data-ng-show=OtrsPopupCtrl.ticket.category><label for=select-subCategories class=control-label><span data-translate=otrs_subCategory_choice></span><oui-spinner data-ng-show=OtrsPopupCtrl.loaders.models data-size=s></oui-spinner></label><select class=form-control id=select-subCategories name=select-requests required data-ng-model=OtrsPopupCtrl.ticket.subcategory data-ng-options=\"subCategory as ('otrs_subCategory_' + OtrsPopupCtrl.ticket.category + '_' + subCategory | translate) for subCategory in OtrsPopupCtrl.subCategories[OtrsPopupCtrl.ticket.category]\" data-ng-disabled=OtrsPopupCtrl.loaders.models></select></div><div data-ng-switch=OtrsPopupCtrl.formDetails><div data-ng-switch-when=start><button type=button class=\"btn btn-block btn-default\" data-ng-disabled=\"OtrsPopupCtrl.loaders.services || OtrsPopupCtrl.loaders.send\" data-ng-click=OtrsPopupCtrl.continueForm() data-translate=otrs_popup_continue></button></div><div data-ng-switch-when=message><div class=form-group><label for=txt-subject class=control-label data-translate=otrs_popup_subject></label><input id=txt-subject name=txt-subject class=form-control required placeholder=\"{{:: 'otrs_popup_subject' | translate }}\" data-ng-model=OtrsPopupCtrl.ticket.subject></div><div class=form-group><label for=txt-message class=control-label data-translate=otrs_popup_body></label><textarea id=txt-message name=txt-message class=form-control rows=4 required placeholder=\"{{:: 'otrs_popup_body' | translate }}\" data-ng-model=OtrsPopupCtrl.ticket.body>\n" +
-    "                            </textarea></div><div class=form-group><button type=submit class=\"btn btn-block btn-primary\" data-ng-disabled=\"!OtrsPopupCtrl.otrsPopupForm.$valid || OtrsPopupCtrl.loaders.services || OtrsPopupCtrl.loaders.send\"><span class=\"fa fa-envelope\" aria-hidden=true></span> <span data-translate=otrs_popup_add_ticket></span><oui-spinner data-ng-show=OtrsPopupCtrl.loaders.send data-size=s></oui-spinner></button></div></div><div data-ng-switch-when=replacement-disk></div></div></form><form id=diskReplacement name=diskReplacement data-ng-if=\"OtrsPopupCtrl.formDetails === OtrsPopupCtrl.interventionEnum.REPLACEMENTDISK\" data-ng-submit=OtrsPopupCtrl.sendDiskReplacement()><div class=form-group><label class=control-label for=diskReplacementService><span data-translate=otrs_popup_service></span><oui-spinner data-ng-show=OtrsPopupCtrl.loaders.services data-size=s></oui-spinner><button class=\"btn btn-link\" data-ng-hide=OtrsPopupCtrl.loaders.services data-ng-click=OtrsPopupCtrl.getServices(true) data-ng-disabled=OtrsPopupCtrl.loaders.send><span class=\"fa fa-refresh\" aria-hidden=true></span> <span data-translate=otrs_popup_services_refresh></span></button></label><select class=form-control id=diskReplacementService name=diskReplacementService required data-ng-model=OtrsPopupCtrl.intervention.serviceName data-ng-disabled=OtrsPopupCtrl.loaders.services><optgroup label=\"{{ category.translatedName }}\" data-ng-repeat=\"category in OtrsPopupCtrl.services track by $index\"><option value=\"{{ service.serviceName }}\" data-ng-repeat=\"service in category.services track by $index\" data-ng-bind=service.displayName></option></optgroup></select></div><div class=text-center data-ng-show=OtrsPopupCtrl.loaders.intervention><oui-spinner></oui-spinner></div><div class=form-group><label class=control-label for=diskSerial><span data-ng-if=OtrsPopupCtrl.intervention.disk.inverse data-translate=otrs_intervention_disk_id_label_not></span> <span data-ng-if=!OtrsPopupCtrl.intervention.disk.inverse data-translate=otrs_intervention_disk_id_label></span> <span data-ng-if=OtrsPopupCtrl.intervention.guides.diskSerial data-translate=otrs_intervention_disk_serial_guide data-translate-values=\"{\n" +
-    "                                  url: OtrsPopupCtrl.intervention.guides.diskSerial\n" +
-    "                              }\"></span></label><div class=input-group data-ng-repeat=\"disk in OtrsPopupCtrl.intervention.disk.disks\"><input class=form-control name=diskSerial required data-ng-model=disk.disk_serial data-translate-attr=\"{\n" +
+    "                            </textarea></div><div class=form-group><button type=submit class=\"btn btn-block btn-primary\" data-ng-disabled=\"!OtrsPopupCtrl.otrsPopupForm.$valid || OtrsPopupCtrl.loaders.services || OtrsPopupCtrl.loaders.send\"><span data-translate=otrs_popup_add_ticket></span><oui-spinner data-ng-show=OtrsPopupCtrl.loaders.send data-size=s></oui-spinner></button></div></div><div data-ng-switch-when=replacement-disk></div></div></form><form id=diskReplacement name=diskReplacement data-ng-if=\"OtrsPopupCtrl.formDetails === OtrsPopupCtrl.interventionEnum.REPLACEMENTDISK\" data-ng-submit=OtrsPopupCtrl.sendDiskReplacement()><div class=form-group><label class=control-label for=diskReplacementService><span data-translate=otrs_popup_service></span><oui-spinner data-ng-show=OtrsPopupCtrl.loaders.services data-size=s></oui-spinner><button class=\"btn btn-link\" data-ng-hide=OtrsPopupCtrl.loaders.services data-ng-click=OtrsPopupCtrl.getServices(true) data-ng-disabled=OtrsPopupCtrl.loaders.send><span class=\"fa fa-refresh\" aria-hidden=true></span> <span data-translate=otrs_popup_services_refresh></span></button></label><select class=form-control id=diskReplacementService name=diskReplacementService required data-ng-model=OtrsPopupCtrl.intervention.serviceName data-ng-disabled=OtrsPopupCtrl.loaders.services><optgroup label=\"{{ category.translatedName }}\" data-ng-repeat=\"category in OtrsPopupCtrl.services track by $index\"><option value=\"{{ service.serviceName }}\" data-ng-repeat=\"service in category.services track by $index\" data-ng-bind=service.displayName></option></optgroup></select></div><div class=text-center data-ng-show=OtrsPopupCtrl.loaders.intervention><oui-spinner></oui-spinner></div><div class=form-group><label class=control-label for=diskSerial><span data-ng-if=OtrsPopupCtrl.intervention.disk.inverse data-translate=otrs_intervention_disk_id_label_not></span> <span data-ng-if=!OtrsPopupCtrl.intervention.disk.inverse data-translate=otrs_intervention_disk_id_label></span></label><div class=input-group data-ng-repeat=\"disk in OtrsPopupCtrl.intervention.disk.disks\"><input class=form-control name=diskSerial required data-ng-model=disk.disk_serial data-translate-attr=\"{\n" +
     "                                   'placeholder': 'otrs_intervention_disk_serial_placeholder'\n" +
-    "                               }\"><select data-ng-if=OtrsPopupCtrl.intervention.slotInfo.canUseSlotId data-ng-model=disk.slot_id data-ng-options=\"n for n in OtrsPopupCtrl.intervention.enums.slotID\"><option value=\"\" selected disabled data-translate=otrs_intervention_disk_slotID></option></select><span class=input-group-btn><button type=button class=\"btn btn-default\" data-ng-show=$first data-ng-click=OtrsPopupCtrl.addDisk()><span class=\"fa fa-plus\" aria-hidden=true></span></button> <button type=button class=\"btn btn-default\" data-ng-show=!$first data-ng-click=OtrsPopupCtrl.removeChoice($index)><span class=\"fa fa-minus\" aria-hidden=true></span></button></span></div><div class=checkbox><label><input type=checkbox name=diskReplacementReverse id=diskReplacementReverse data-ng-model=OtrsPopupCtrl.intervention.disk.inverse> <span data-translate=otrs_intervention_disk_id_not_retrievable></span></label></div><div data-ng-if=OtrsPopupCtrl.intervention.canHotSwap><p><span data-translate=otrs_intervention_disk_canHotSwap></span> <span data-ng-if=\"OtrsPopupCtrl.intervention.hasMegaRaid && OtrsPopupCtrl.intervention.guides.megaRaidLED\" data-ng-bind-html=\"tr('otrs_intervention_disk_guide', [OtrsPopupCtrl.intervention.guides.megaRaidLED])\"></span> <span data-ng-if=\"!OtrsPopupCtrl.intervention.hasMegaRaid && OtrsPopupCtrl.intervention.guides.noMegaRaidLED\" data-ng-bind-html=\"tr('otrs_intervention_disk_guide', [OtrsPopupCtrl.intervention.guides.noMegaRaidLED])\"></span></p></div><div class=form-group><label for=diskReplacementComment class=control-label data-translate=otrs_intervention_disk_comment></label><textarea rows=4 name=diskReplacementComment id=diskReplacementComment class=form-control data-ng-model=OtrsPopupCtrl.intervention.disk.comment>\n" +
+    "                               }\"><select data-ng-if=OtrsPopupCtrl.intervention.slotInfo.canUseSlotId data-ng-model=disk.slot_id data-ng-options=\"n for n in OtrsPopupCtrl.intervention.enums.slotID\"><option value=\"\" selected disabled data-translate=otrs_intervention_disk_slotID></option></select><span class=input-group-btn><button type=button class=\"btn btn-default\" data-ng-show=$first data-ng-click=OtrsPopupCtrl.addDisk()><span class=\"fa fa-plus\" aria-hidden=true></span></button> <button type=button class=\"btn btn-default\" data-ng-show=!$first data-ng-click=OtrsPopupCtrl.removeChoice($index)><span class=\"fa fa-minus\" aria-hidden=true></span></button></span></div><div class=checkbox><label><input type=checkbox name=diskReplacementReverse id=diskReplacementReverse data-ng-model=OtrsPopupCtrl.intervention.disk.inverse> <span data-translate=otrs_intervention_disk_id_not_retrievable></span></label></div><div class=form-group><label for=diskReplacementComment class=control-label data-translate=otrs_intervention_disk_comment></label><textarea rows=4 name=diskReplacementComment id=diskReplacementComment class=form-control data-ng-model=OtrsPopupCtrl.intervention.disk.comment>\n" +
     "                    </textarea><span id=helpDiskReplacementComment class=\"help-block italic\" data-translate=otrs_intervention_disk_comment_english_please></span></div><div class=\"form-group confirmation\"><p data-ng-if=OtrsPopupCtrl.intervention.canHotSwap data-ng-bind-html=\"tr('otrs_intervention_disk_warning_hotswap')\"></p><p data-ng-if=!OtrsPopupCtrl.intervention.canHotSwap data-ng-bind-html=\"tr('otrs_intervention_disk_warning2')\"></p><div class=checkbox><label><input type=checkbox name=diskReplacementConfirm id=diskReplacementConfirm data-ng-model=OtrsPopupCtrl.intervention.confirm> <span data-translate=otrs_intervention_disk_confirm></span></label></div></div><button type=button class=\"btn btn-block btn-default\" data-ng-click=\"OtrsPopupCtrl.setForm('start')\" data-translate=otrs_popup_back></button> <button type=submit class=\"btn btn-block btn-primary\" data-ng-disabled=\"!diskReplacement.$valid ||\n" +
     "                                           OtrsPopupCtrl.loaders.services ||\n" +
     "                                           OtrsPopupCtrl.loaders.send ||\n" +
     "                                           !OtrsPopupCtrl.intervention.confirm ||\n" +
-    "                                           OtrsPopupCtrl.loaders.intervention\"><span class=\"fa fa-envelope\" aria-hidden=true></span> <span data-translate=otrs_popup_add_ticket></span><oui-spinner data-ng-if=OtrsPopupCtrl.loaders.send data-size=s></oui-spinner></button></div></form></div></div></div>"
+    "                                           OtrsPopupCtrl.loaders.intervention\"><span data-translate=otrs_popup_add_ticket></span><oui-spinner data-ng-if=OtrsPopupCtrl.loaders.send data-size=s></oui-spinner></button></div></form></div></div></div>"
   );
 
 }]);
