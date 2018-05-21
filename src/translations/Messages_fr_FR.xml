@@ -177,7 +177,7 @@
    <translation id="otrs_subCategory_assistance_new" qtlid="291214">Information / souscription d'un service supplémentaire</translation>
    <translation id="otrs_subCategory_assistance_other" qtlid="19963">Autre</translation>
 
-   <translation id="otrs_subCategory_billing_inProgress">Suivi d'une commande en cours</translation>
+   <translation id="otrs_subCategory_billing_inProgress">Suivi d’une commande en cours</translation>
    <translation id="otrs_subCategory_billing_new" qtlid="291240">Je souhaite passer une commande</translation>
    <translation id="otrs_subCategory_billing_bill">Information sur une facture</translation>
    <translation id="otrs_subCategory_billing_other" qtlid="19963">Autre</translation>

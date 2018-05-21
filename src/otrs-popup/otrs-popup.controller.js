@@ -305,7 +305,7 @@ angular.module("ovh-angular-otrs").controller("OtrsPopupCtrl", function ($q, $ro
             self.categories = results.supportSchema.models["support.TicketProductEnum"].enum;
             self.requests = results.supportSchema.models["support.TicketCategoryEnum"].enum;
 
-            if (_.get(results.me, "ovhSubsidiary").toLowerCase() === "fr") {
+            if (_.get(results.me, "ovhSubsidiary", "").toLowerCase() === "fr") {
                 self.requests.push(OTRS_POPUP_CATEGORIES.SALES);
             }
 
