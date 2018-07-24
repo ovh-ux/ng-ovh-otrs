@@ -56,7 +56,7 @@ angular.module("ovh-angular-otrs")
                 $scope.$on("otrs.popup.open", $scope.open);
                 $scope.$on("otrs.popup.close", $scope.close);
 
-                $element.children(".otrs-popup.draggable").on("drag", function (event, ui) {
+                $element.children(".otrs-popup.draggable").one("drag", function (event, ui) {
                     ui.helper.removeClass("otrs-popup-initial");
                 });
             }
