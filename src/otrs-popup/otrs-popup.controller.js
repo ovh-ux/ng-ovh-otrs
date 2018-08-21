@@ -121,11 +121,6 @@ angular.module("ovh-angular-otrs").controller("OtrsPopupCtrl", function ($q, $ro
         if (!self.loaders.send && self.ticket.body) {
             self.loaders.send = true;
 
-            if (self.ticket.serviceName === OTHER_SERVICE) {
-                self.ticket.serviceName = "";
-                self.ticket.category = TICKET_CATEGORIES.DEFAULT;
-            }
-
             return OvhApiSupport.v6()
                 .create(self.ticket).$promise
                 .then(function (data) {
