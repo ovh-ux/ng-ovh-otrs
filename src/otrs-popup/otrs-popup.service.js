@@ -20,7 +20,7 @@ angular.module("ovh-angular-otrs")
                 $rootScope.$broadcast("otrs.popup.opened");
             } else {
                 self.close();
-                isOpen = true;
+                isOpen = false;
                 $rootScope.$broadcast("otrs.popup.closed");
             }
         };
