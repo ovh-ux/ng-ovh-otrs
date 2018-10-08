@@ -1,43 +1,51 @@
-angular.module("ovh-angular-otrs")
-    .service("OtrsPopupService", function ($rootScope) {
-        "use strict";
+import $ from 'jquery';
 
-        var self = this;
-        var actions = ["minimize", "maximize", "restore", "close", "open"];
-        var isLoaded = false;
-        var isOpen = false;
+export default class OtrsPopupService {
+  constructor($rootScope) {
+    'ngInject';
 
-        angular.forEach(actions, function (action) {
-            self[action] = function (id) {
-                $rootScope.$broadcast("otrs.popup." + action, id);
-            };
-        });
+    this.$rootScope = $rootScope;
 
-        this.toggle = function () {
-            if ($("[data-otrs-popup] .draggable").hasClass("close")) {
-                self.open();
-                isOpen = true;
-                $rootScope.$broadcast("otrs.popup.opened");
-            } else {
-                self.close();
-                isOpen = false;
-                $rootScope.$broadcast("otrs.popup.closed");
-            }
-        };
+    this._isLoaded = false;
+    this._isOpen = false;
 
-        this.init = function () {
-            self.open();
-            isLoaded = true;
-            isOpen = true;
-            $rootScope.$broadcast("otrs.popup.opened");
-        };
-
-        this.isLoaded = function () {
-            return isLoaded;
-        };
-
-        this.isOpen = function () {
-            return isOpen;
-        };
-
+    const actions = [
+      'minimize',
+      'maximize',
+      'restore',
+      'close',
+      'open',
+    ];
+    angular.forEach(actions, (action) => {
+      this[action] = id => this.$rootScope.$broadcast(`otrs.popup.${action}`, id);
     });
+  }
+
+  init() {
+    this.open();
+    this._isLoaded = true;
+    this._isOpen = true;
+    this.$rootScope.$broadcast('otrs.popup.opened');
+  }
+
+  isLoaded() {
+    return this._isLoaded;
+  }
+
+  isOpen() {
+    return this._isOpen;
+  };
+
+  toggle() {
+    if ($('[data-otrs-popup] .draggable').hasClass('close')) {
+      this.open();
+      this._isOpen = true;
+      this.$rootScope.$broadcast('otrs.popup.opened');
+    }
+    else {
+      this.close();
+      this._isOpen = false;
+      this.$rootScope.$broadcast('otrs.popup.closed');
+    }
+  }
+}
