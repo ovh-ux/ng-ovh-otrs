@@ -394,8 +394,8 @@ export default /* @ngInject */ function (
         self.refreshFormDetails();
       });
 
-      $scope.$on("otrs.popup.opened", self.getServices);
-      $scope.$on("otrs.popup.closed", function () {
+      $scope.$on('otrs.popup.opened', self.getServices);
+      $scope.$on('otrs.popup.closed', () => {
         self.services = [];
       });
     })

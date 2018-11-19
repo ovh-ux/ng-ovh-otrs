@@ -1,8 +1,7 @@
 import angular from 'angular';
 import 'ovh-api-services';
 import 'ovh-jquery-ui-draggable-ng';
-import translate from 'angular-translate';
-// import asyncLoaderFactory from './async-loader.factory';
+import 'angular-translate';
 
 import {
   ASSISTANCE_ENUM,
@@ -26,14 +25,8 @@ export default angular
   .module('ovh-angular-otrs', [
     'ovh-api-services',
     'ovh-jquery-ui-draggable-ng',
-    translate,
+    'pascalprecht.translate',
   ])
-  // .factory('asyncLoader', asyncLoaderFactory)
-  // .run(($translate, asyncLoader) => {
-  //   asyncLoader.addTranslations(
-  // import(`./translations/Messages_${$translate.use()}.xml`).then(x => x.default));
-  //   $translate.refresh();
-  // })
   .constant('OTRS_POPUP_ASSISTANCE_ENUM', ASSISTANCE_ENUM)
   .constant('OTRS_POPUP_BILLING_ENUM', BILLING_ENUM)
   .constant('OTRS_POPUP_INCIDENT_ENUM', INCIDENT_ENUM)
