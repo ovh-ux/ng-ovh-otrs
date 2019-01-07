@@ -25,37 +25,31 @@ npm install ovh-angular-otrs --save
 Inject module
 
 ```js
-angular.module("myApp", ["ovh-angular-otrs"]);
-```
+import angular from 'angular';
 
-Inject it to manager-navbar at app.config:
-
-```js
-angular.module("myApp")
-    .config((OtrsPopupProvider) => {
-        OtrsPopupProvider.setBaseUrlTickets("…");
-    });
+angular
+  .module('myApp', ['ovh-angular-otrs'])
+  .config(/* @ngInject */ (OtrsPopupProvider) => {
+    // Inject it to manager-navbar at app.config:
+    OtrsPopupProvider.setBaseUrlTickets('…');
+  });
 ```
 
 ```js
-…
-const assistanceMenu = [];
-
-assistanceMenu.push({
-    title: $translate.instant("otrs_menu_new_ticket"),
-    click: (callback) => {
-        if (!OtrsPopupService.isLoaded()) {
-            OtrsPopupService.init();
-        } else {
-            OtrsPopupService.toggle();
-        }
-
-        if (_.isFunction(callback)) {
-            callback();
-        }
+const assistanceMenu = [{
+  title: $translate.instant('otrs_menu_new_ticket'),
+  click: (callback) => {
+    if (!OtrsPopupService.isLoaded()) {
+      OtrsPopupService.init();
+    } else {
+      OtrsPopupService.toggle();
     }
-});
-…
+
+    if (_.isFunction(callback)) {
+      callback();
+    }
+  },
+}];
 ```
 
 ## Get the sources
