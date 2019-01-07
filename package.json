@@ -2,14 +2,24 @@
   "name": "ovh-angular-otrs",
   "version": "7.0.0-alpha.1",
   "description": "Manage OTRS tickets",
-  "main": "./dist/cjs/index.js",
-  "browser": "./dist/umd/ovh-angular-otrs.js",
+  "repository": "ovh-ux/ovh-angular-otrs",
+  "license": "BSD-3-Clause",
+  "author": "OVH SAS",
   "files": [
     "dist"
   ],
-  "repository": "ovh-ux/ovh-angular-otrs",
-  "author": "OVH SAS",
-  "license": "BSD-3-Clause",
+  "main": "./dist/cjs/index.js",
+  "browser": "./dist/umd/ovh-angular-otrs.js",
+  "scripts": {
+    "build": "rollup -c",
+    "lint": "run-p lint:css lint:js",
+    "lint:css": "stylelint 'client/**/*.less' --fix",
+    "lint:js": "eslint --quiet --fix ./src",
+    "prepare": "rollup -c",
+    "test": "yarn run lint",
+    "version": "npx conventional-changelog-cli -p angular -i CHANGELOG.md -s && git add CHANGELOG.md",
+    "postversion": "git push && git push --tags"
+  },
   "dependencies": {
     "lodash": "^4.17.11"
   },
@@ -38,15 +48,5 @@
     "jquery": "^2.1.3",
     "ovh-api-services": "^3.15.1",
     "ovh-jquery-ui-draggable-ng": "^0.0.5"
-  },
-  "scripts": {
-    "build": "rollup -c",
-    "lint": "run-p lint:css lint:js",
-    "lint:js": "eslint --quiet --fix ./src",
-    "lint:css": "stylelint 'client/**/*.less' --fix",
-    "prepare": "rollup -c",
-    "test": "yarn run lint",
-    "version": "npx conventional-changelog-cli -p angular -i CHANGELOG.md -s && git add CHANGELOG.md",
-    "postversion": "git push && git push --tags"
   }
 }
