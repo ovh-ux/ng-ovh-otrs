@@ -8,8 +8,8 @@ export default class OtrsPopupService {
 
     this.$rootScope = $rootScope;
 
-    this._isLoaded = false;
-    this._isOpen = false;
+    this.isLoaded = false;
+    this.isOpen = false;
 
     const actions = [
       'minimize',
@@ -25,27 +25,27 @@ export default class OtrsPopupService {
 
   init() {
     this.open();
-    this._isLoaded = true;
-    this._isOpen = true;
+    this.isLoaded = true;
+    this.isOpen = true;
     this.$rootScope.$broadcast('otrs.popup.opened');
   }
 
   isLoaded() {
-    return this._isLoaded;
+    return this.isLoaded;
   }
 
   isOpen() {
-    return this._isOpen;
+    return this.isOpen;
   }
 
   toggle() {
     if ($('[data-otrs-popup] .draggable').hasClass('close')) {
       this.open();
-      this._isOpen = true;
+      this.isOpen = true;
       this.$rootScope.$broadcast('otrs.popup.opened');
     } else {
       this.close();
-      this._isOpen = false;
+      this.isOpen = false;
       this.$rootScope.$broadcast('otrs.popup.closed');
     }
   }
