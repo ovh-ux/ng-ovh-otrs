@@ -12,6 +12,7 @@
   "browser": "./dist/umd/ng-ovh-otrs.js",
   "scripts": {
     "build": "rollup -c",
+    "dev": "rollup -c --watch",
     "lint": "run-p lint:css lint:js lint:md",
     "lint:css": "stylelint 'client/**/*.less' --fix",
     "lint:js": "eslint --quiet --fix --format=pretty src",
