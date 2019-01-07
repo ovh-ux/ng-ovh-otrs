@@ -1,15 +1,15 @@
 {
-  "name": "ovh-angular-otrs",
+  "name": "@ovh-ux/ng-ovh-otrs",
   "version": "7.0.0-alpha.1",
   "description": "Manage OTRS tickets",
-  "repository": "ovh-ux/ovh-angular-otrs",
+  "repository": "ovh-ux/ng-ovh-otrs",
   "license": "BSD-3-Clause",
   "author": "OVH SAS",
   "files": [
     "dist"
   ],
   "main": "./dist/cjs/index.js",
-  "browser": "./dist/umd/ovh-angular-otrs.js",
+  "browser": "./dist/umd/ng-ovh-otrs.js",
   "scripts": {
     "build": "rollup -c",
     "lint": "run-p lint:css lint:js lint:md",
@@ -28,12 +28,10 @@
     "@commitlint/cli": "^7.1.2",
     "@commitlint/config-angular": "^7.1.2",
     "@ovh-ux/component-rollup-config": "^5.0.0-beta.4",
-    "babel-eslint": "^8.2.6",
     "bootstrap": "^3.3.6",
     "eslint": "^5.9.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-formatter-pretty": "^2.0.0",
-    "eslint-plugin-angular": "^3.3.0",
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-markdown": "^1.0.0",
     "htmlhint": "^0.10.1",

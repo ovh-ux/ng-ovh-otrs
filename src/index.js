@@ -21,8 +21,10 @@ import OtrsPopupInterventionService from './otrs-popup/intervention/otrs-popup-i
 
 import './otrs.less';
 
-export default angular
-  .module('ovh-angular-otrs', [
+const moduleName = 'ngOvhOtrs';
+
+angular
+  .module(moduleName, [
     'ovh-api-services',
     'ovh-jquery-ui-draggable-ng',
     'pascalprecht.translate',
@@ -39,5 +41,6 @@ export default angular
   .directive('otrsPopup', OtrsPopupDirective)
   .provider('OtrsPopup', OtrsPopupProvider)
   .service('OtrsPopupService', OtrsPopupService)
-  .service('OtrsPopupInterventionService', OtrsPopupInterventionService)
-  .name;
+  .service('OtrsPopupInterventionService', OtrsPopupInterventionService);
+
+export default moduleName;
