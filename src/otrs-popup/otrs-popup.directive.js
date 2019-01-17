@@ -1,4 +1,3 @@
-import 'bootstrap';
 import template from './otrs-popup.html';
 import './otrs-popup.less';
 
