@@ -1,3 +1,5 @@
+import angular from 'angular';
+
 export default function () {
   const self = this;
   let baseUrlTickets = null;

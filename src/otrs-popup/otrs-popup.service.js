@@ -1,3 +1,5 @@
+/* eslint no-underscore-dangle: 0 */
+import angular from 'angualr';
 import $ from 'jquery';
 
 export default class OtrsPopupService {
@@ -34,15 +36,14 @@ export default class OtrsPopupService {
 
   isOpen() {
     return this._isOpen;
-  };
+  }
 
   toggle() {
     if ($('[data-otrs-popup] .draggable').hasClass('close')) {
       this.open();
       this._isOpen = true;
       this.$rootScope.$broadcast('otrs.popup.opened');
-    }
-    else {
+    } else {
       this.close();
       this._isOpen = false;
       this.$rootScope.$broadcast('otrs.popup.closed');
