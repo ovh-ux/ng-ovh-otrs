@@ -1,6 +1,6 @@
 {
   "name": "ovh-angular-otrs",
-  "version": "6.2.2",
+  "version": "6.2.3-alpha.0",
   "description": "Manage OTRS tickets",
   "main": "./dist/cjs/index.js",
   "browser": "./dist/umd/ovh-angular-otrs.js",
