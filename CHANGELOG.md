@@ -1,3 +1,7 @@
+# [7.0.0-alpha.1](https://github.com/ovh-ux/ovh-angular-otrs/compare/v6.2.3-alpha.0...v7.0.0-alpha.1) (2019-01-17)
+
+
+
 # [7.0.0-alpha.0](https://github.com/ovh-ux/ovh-angular-otrs/compare/v6.2.3-alpha.0...v7.0.0-alpha.0) (2019-01-17)
 
 
