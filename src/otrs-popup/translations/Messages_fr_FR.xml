@@ -124,6 +124,11 @@
    <translation id="otrs_service_category_CEPH" qtlid="406442">CDA</translation>
    <translation id="otrs_service_category_other" qtlid="316047">Autre demande</translation>
 
+   <translation id="otrs_service_type_choice">Type de service :</translation>
+   <translation id="otrs_service_type_dedicated_server" qtlid="66032">Serveur dédié</translation>
+   <translation id="otrs_service_type_vps" qtlid="23083">VPS</translation>
+   
+   
    <translation id="otrs_universe_choice" qtlid="406455">Univers :</translation>
    <translation id="otrs_universe_WEB" qtlid="135840">Web</translation>
    <translation id="otrs_universe_SUNRISE" qtlid="232401">Sunrise</translation>

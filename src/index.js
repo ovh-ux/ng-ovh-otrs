@@ -3,6 +3,7 @@ import 'ovh-api-services';
 import 'angular-translate';
 
 import {
+  API_EXCLUDED,
   ASSISTANCE_ENUM,
   BILLING_ENUM,
   INCIDENT_ENUM,
@@ -27,6 +28,7 @@ angular
     'ovh-api-services',
     'pascalprecht.translate',
   ])
+  .constant('OTRS_POPUP_API_EXCLUDED', API_EXCLUDED)
   .constant('OTRS_POPUP_ASSISTANCE_ENUM', ASSISTANCE_ENUM)
   .constant('OTRS_POPUP_BILLING_ENUM', BILLING_ENUM)
   .constant('OTRS_POPUP_INCIDENT_ENUM', INCIDENT_ENUM)

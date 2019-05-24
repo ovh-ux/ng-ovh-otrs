@@ -6,11 +6,12 @@ import includes from 'lodash/includes';
 import isEmpty from 'lodash/isEmpty';
 import map from 'lodash/map';
 import remove from 'lodash/remove';
-import set from 'lodash/set';
 import times from 'lodash/times';
 import values from 'lodash/values';
+import snakeCase from 'lodash/snakeCase';
 
 export default /* @ngInject */ function (
+  $http,
   $injector,
   $q,
   $rootScope,
@@ -19,11 +20,12 @@ export default /* @ngInject */ function (
   $translate,
   OvhApiMe,
   OvhApiMeVipStatus,
-  OvhApiProductsAapi,
+  OvhApiService,
   OvhApiSupport,
   OtrsPopup,
   OtrsPopupInterventionService,
   OtrsPopupService,
+  OTRS_POPUP_API_EXCLUDED,
   OTRS_POPUP_ASSISTANCE_ENUM,
   OTRS_POPUP_BILLING_ENUM,
   OTRS_POPUP_CATEGORIES,
@@ -95,44 +97,23 @@ export default /* @ngInject */ function (
   }
 
   self.getServices = () => {
-    self.loaders.services = true;
-
     // hide alert
     manageAlert();
 
-    if (!OtrsPopupService.isOpen()) {
+    if (!OtrsPopupService.isOpen() || !this.selectedServiceType) {
       return $q.when([]);
     }
 
-    return OvhApiProductsAapi.get({
-      includeInactives: true,
-      universe: self.selectedUniverse === 'CLOUD_DEDICATED' ? 'DEDICATED' : self.selectedUniverse,
-    }).$promise
-      .then((services) => {
-        const translationPromises = services.results.map(s => $translate(`otrs_service_category_${s.name}`, null, null, s.name)
-          .then((value) => {
-            set(s, 'translatedName', value);
-            return s;
-          }));
-
-        return $q.all(translationPromises).then((servicesTranslations) => {
-          const sortedServicesTranslations = servicesTranslations.sort(
-            (a, b) => a.translatedName.localeCompare(b.translatedName),
-          );
-          const translatedName = $translate.instant('otrs_service_category_other');
-          sortedServicesTranslations.push({
-            translatedName,
-            services: [
-              {
-                serviceName: OTHER_SERVICE,
-                displayName: translatedName,
-              },
-            ],
-          });
-          self.services = sortedServicesTranslations;
-
-          return sortedServicesTranslations;
-        });
+    self.loaders.services = true;
+    return new OvhApiService
+      .Aapi()
+      .query({
+        type: this.selectedServiceType.route,
+        external: false,
+      })
+      .$promise
+      .then((items) => {
+        this.services = items;
       })
       .catch((err) => {
         manageAlert([($translate.instant('otrs_err_get_infos'), err.data && err.data.message) || ''].join(' '), 'danger');
@@ -330,6 +311,7 @@ export default /* @ngInject */ function (
       me: OvhApiMe.v6().get().$promise,
       meVipStatus: OvhApiMeVipStatus.v6().get().$promise,
       supportSchema: OvhApiSupport.v6().schema().$promise,
+      apiSchema: $http.get('/'),
     }).then((results) => {
       self.currentUser = results.me;
 
@@ -394,6 +376,13 @@ export default /* @ngInject */ function (
       $scope.$on('otrs.popup.closed', () => {
         self.services = [];
       });
+
+      this.serviceTypes = results.apiSchema.data.apis
+        .filter(api => !includes(OTRS_POPUP_API_EXCLUDED, api.path))
+        .map(api => ({
+          route: api.path,
+          name: snakeCase(api.path),
+        }));
     })
       .catch((err) => { manageAlert([($translate.instant('otrs_err_get_infos'), err.data && err.data.message) || ''].join(' '), 'danger'); })
       .finally(() => { self.loaders.models = false; });

@@ -48,8 +48,35 @@ export const UNIVERSES = {
   CA: ['CLOUD_DEDICATED', 'SUNRISE'],
   US: ['CLOUD_DEDICATED'],
 };
+// @todo : expose an API
+export const API_EXCLUDED = [
+  '/abuse',
+  '/analytics',
+  '/auth',
+  '/connectivity',
+  '/contact',
+  '/coworking',
+  '/dedicated/installationTemplate',
+  '/distribution/image',
+  '/me',
+  '/newAccount',
+  '/order',
+  '/partner',
+  '/partners',
+  '/price',
+  '/secret',
+  '/service',
+  '/services',
+  '/session',
+  '/status',
+  '/store',
+  '/supply/mondialRelay',
+  '/support',
+  '/vip',
+];
 
 export default {
+  API_EXCLUDED,
   ASSISTANCE_ENUM,
   BILLING_ENUM,
   INCIDENT_ENUM,
