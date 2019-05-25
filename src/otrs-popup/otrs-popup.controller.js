@@ -26,6 +26,7 @@ export default /* @ngInject */ function (
   OtrsPopupInterventionService,
   OtrsPopupService,
   OTRS_POPUP_API_EXCLUDED,
+  OTRS_POPUP_API_ALIASES,
   OTRS_POPUP_ASSISTANCE_ENUM,
   OTRS_POPUP_BILLING_ENUM,
   OTRS_POPUP_CATEGORIES,
@@ -108,12 +109,16 @@ export default /* @ngInject */ function (
     return new OvhApiService
       .Aapi()
       .query({
-        type: this.selectedServiceType.route,
+        type: get(this.selectedServiceType, 'route'),
         external: false,
       })
       .$promise
       .then((items) => {
         this.services = items;
+        this.services.push({
+          displayName: $translate.instant('otrs_service_type_other'),
+          serviceName: null,
+        });
       })
       .catch((err) => {
         manageAlert([($translate.instant('otrs_err_get_infos'), err.data && err.data.message) || ''].join(' '), 'danger');
@@ -134,6 +139,7 @@ export default /* @ngInject */ function (
     if (!self.loaders.send && self.ticket.body) {
       self.loaders.send = true;
 
+      self.ticket.serviceName = get(self.ticket, 'serviceName.serviceName');
       if (self.ticket.serviceName === OTHER_SERVICE) {
         self.ticket.serviceName = '';
         self.ticket.category = TICKET_CATEGORIES.DEFAULT;
@@ -377,11 +383,11 @@ export default /* @ngInject */ function (
         self.services = [];
       });
 
-      this.serviceTypes = results.apiSchema.data.apis
+      this.serviceTypes = get(results, 'apiSchema.data.apis')
         .filter(api => !includes(OTRS_POPUP_API_EXCLUDED, api.path))
         .map(api => ({
-          route: api.path,
-          name: snakeCase(api.path),
+          route: get(OTRS_POPUP_API_ALIASES, api.path, api.path),
+          name: $translate.instant(`otrs_service_type_${snakeCase(api.path)}`),
         }));
     })
       .catch((err) => { manageAlert([($translate.instant('otrs_err_get_infos'), err.data && err.data.message) || ''].join(' '), 'danger'); })

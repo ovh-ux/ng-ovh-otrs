@@ -71,24 +71,16 @@
                            class="control-label"
                            data-translate="otrs_service_type_choice">
                     </label>
-                    <select class="form-control"
-                            id="select-service-type"
-                            name="select-service-type"
-                            required
-                            data-ng-model="OtrsPopupCtrl.selectedServiceType"
-                            data-ng-options="serviceType as ( 'otrs_service_type_'+ serviceType.name | translate ) for serviceType in OtrsPopupCtrl.serviceTypes"
-                            data-ng-change="OtrsPopupCtrl.getServices()">
-                    </select>
-                 </div> 
-                 <oui-select
-                    items="OtrsPopupCtrl.serviceTypes"
-                    match="name"
-                    model="OtrsPopupCtrl.selectedServiceType"
-                    name="select-service-type"
-                    on-change="OtrsPopupCtrl.getServices()"
-                    searchable>
-                 </oui-select>
+                    <oui-select
+                      items="OtrsPopupCtrl.serviceTypes"
+                      match="name"
+                      model="OtrsPopupCtrl.selectedServiceType"
+                      name="select-service-type"
+                      on-change="OtrsPopupCtrl.getServices()"
+                      searchable>
+                    </oui-select>
                  <!-- END OF SELECTED SERVICE TYPE -->
+                 </div>
 
                 <!-- SERVICENAME -->
                 <div class="form-group">
@@ -99,15 +91,14 @@
                                      data-size="s">
                         </oui-spinner>
                     </label>
-
-                    <select class="form-control"
-                            id="select-services"
-                            name="select-services"
-                            required
-                            data-ng-model="OtrsPopupCtrl.ticket.serviceName"
-                            data-ng-disabled="OtrsPopupCtrl.loaders.services"
-                            data-ng-options="service as service.displayName for service in OtrsPopupCtrl.services track by service.name">
-                    </select>
+                    <oui-select
+		      disabled="OtrsPopupCtrl.loaders.services || OtrsPopupCtrl.services.length === 0"
+                      items="OtrsPopupCtrl.services"
+                      match="displayName"
+                      model="OtrsPopupCtrl.ticket.serviceName"
+                      name="select-services"
+                      searchable>
+                    </oui-select>
 
                     <small data-ng-show="OtrsPopupCtrl.productHasFaq()"
                            data-translate="otrs_popup_see_faq"

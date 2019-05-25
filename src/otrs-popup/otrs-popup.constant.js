@@ -59,11 +59,14 @@ export const API_EXCLUDED = [
   '/dedicated/installationTemplate',
   '/distribution/image',
   '/me',
+  '/msServices',
   '/newAccount',
   '/order',
+  '/pack/siptrunk',
   '/partner',
   '/partners',
   '/price',
+  '/search',
   '/secret',
   '/service',
   '/services',
@@ -73,7 +76,12 @@ export const API_EXCLUDED = [
   '/supply/mondialRelay',
   '/support',
   '/vip',
+  '/vpn',
 ];
+export const API_ALIASES = {
+  '/cloud': '/cloud/project',
+  '/telephony': '/telephony/lines',
+};
 
 export default {
   API_EXCLUDED,
@@ -84,4 +92,5 @@ export default {
   CATEGORIES,
   SERVICES,
   UNIVERSES,
+  API_ALIASES,
 };
