@@ -83,13 +83,13 @@
    <translation id="otrs_service_type_ip_loadbalancing" qtlid="233544">IP load balancing</translation>
    <translation id="otrs_service_type_ip">IP</translation>
    <translation id="otrs_service_type_kube">Kubernetes</translation>
-   <translation id="otrs_service_type_FAILOVER" qtlid="160502">IP failover</translation>
+   <translation id="otrs_service_type_ip_service" qtlid="160502">IP failover</translation>
    <translation id="otrs_service_other_services" qtlid="228540">Autre service</translation>
    <translation id="otrs_service_type_email_domain" qtlid="260078">Email domaine</translation>
    <translation id="otrs_service_type_stack_mis" qtlid="285408">Infrastructure managée</translation>
    <translation id="otrs_service_type_over_the_box" qtlid="281977">OverTheBox</translation>
    <translation id="otrs_service_type_CSP2" qtlid="325640">Revendeur Office</translation>
-   <translation id="otrs_service_type_msServices_sharepoint" qtlid="297072">SharePoint</translation>
+   <translation id="otrs_service_type_ms_services_sharepoint" qtlid="297072">SharePoint</translation>
    <translation id="otrs_service_type_all_dom" qtlid="270293">Pack AllDom</translation>
    <translation id="otrs_service_type_cluster_hadoop" qtlid="219901">Cluster Hadoop</translation>
    <translation id="otrs_service_type_dedicated_server" qtlid="66032">Serveur Dédié</translation>

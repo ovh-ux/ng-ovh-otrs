@@ -82,9 +82,18 @@ export const API_ALIASES = {
   '/cloud': '/cloud/project',
   '/telephony': '/telephony/lines',
 };
+export const API_EXTRAS_ENDPOINTS = [
+  {
+    path: '/ip/service',
+  },
+  {
+    path: '/msServices/sharepoint',
+  },
+];
 
 export default {
   API_EXCLUDED,
+  API_EXTRAS_ENDPOINTS,
   ASSISTANCE_ENUM,
   BILLING_ENUM,
   INCIDENT_ENUM,

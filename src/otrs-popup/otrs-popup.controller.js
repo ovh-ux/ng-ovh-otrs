@@ -26,6 +26,7 @@ export default /* @ngInject */ function (
   OtrsPopupInterventionService,
   OtrsPopupService,
   OTRS_POPUP_API_EXCLUDED,
+  OTRS_POPUP_API_EXTRAS_ENDPOINTS,
   OTRS_POPUP_API_ALIASES,
   OTRS_POPUP_ASSISTANCE_ENUM,
   OTRS_POPUP_BILLING_ENUM,
@@ -384,6 +385,7 @@ export default /* @ngInject */ function (
       });
 
       this.serviceTypes = get(results, 'apiSchema.data.apis')
+        .concat(OTRS_POPUP_API_EXTRAS_ENDPOINTS)
         .filter(api => !includes(OTRS_POPUP_API_EXCLUDED, api.path))
         .map(api => ({
           route: get(OTRS_POPUP_API_ALIASES, api.path, api.path),
