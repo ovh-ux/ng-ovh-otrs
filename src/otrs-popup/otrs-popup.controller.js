@@ -391,6 +391,11 @@ export default /* @ngInject */ function (
           route: get(OTRS_POPUP_API_ALIASES, api.path, api.path),
           name: $translate.instant(`otrs_service_type_${snakeCase(api.path)}`),
         }));
+
+      this.serviceTypes.push({
+        name: $translate.instant('otrs_service_type_other'),
+        route: null,
+      });
     })
       .catch((err) => { manageAlert([($translate.instant('otrs_err_get_infos'), err.data && err.data.message) || ''].join(' '), 'danger'); })
       .finally(() => { self.loaders.models = false; });

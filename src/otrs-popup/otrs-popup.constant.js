@@ -58,6 +58,7 @@ export const API_EXCLUDED = [
   '/coworking',
   '/dedicated/installationTemplate',
   '/distribution/image',
+  '/freefax',
   '/me',
   '/msServices',
   '/newAccount',
@@ -75,19 +76,28 @@ export const API_EXCLUDED = [
   '/store',
   '/supply/mondialRelay',
   '/support',
+  '/telephony',
   '/vip',
   '/vpn',
 ];
 export const API_ALIASES = {
   '/cloud': '/cloud/project',
-  '/telephony': '/telephony/lines',
 };
 export const API_EXTRAS_ENDPOINTS = [
+  {
+    path: '/domain/zone',
+  },
   {
     path: '/ip/service',
   },
   {
     path: '/msServices/sharepoint',
+  },
+  {
+    path: '/telephony/lines',
+  },
+  {
+    path: '/telephony/aliases',
   },
 ];
 
