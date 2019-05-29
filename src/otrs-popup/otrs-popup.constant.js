@@ -94,10 +94,13 @@ export const API_EXTRAS_ENDPOINTS = [
     path: '/msServices/sharepoint',
   },
   {
-    path: '/telephony/lines',
+    path: '/telephony/*/fax',
   },
   {
-    path: '/telephony/aliases',
+    path: '/telephony/*/line',
+  },
+  {
+    path: '/telephony/*/number',
   },
 ];
 
