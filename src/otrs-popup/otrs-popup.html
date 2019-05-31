@@ -66,21 +66,20 @@
                   data-ng-submit="OtrsPopupCtrl.sendTicket()">
 
                 <!-- SELECTED SERVICE TYPE -->
-                   <div class="form-group">
+                <div class="form-group">
                     <label for="select-service-type"
                            class="control-label"
                            data-translate="otrs_service_type_choice">
                     </label>
-                    <oui-select
-                      items="OtrsPopupCtrl.serviceTypes"
-                      match="name"
-                      model="OtrsPopupCtrl.selectedServiceType"
-                      name="select-service-type"
-                      on-change="OtrsPopupCtrl.getServices()"
-                      searchable>
+                    <oui-select items="OtrsPopupCtrl.serviceTypes"
+                                match="name"
+                                model="OtrsPopupCtrl.selectedServiceType"
+                                name="select-service-type"
+                                on-change="OtrsPopupCtrl.getServices()"
+                                searchable>
                     </oui-select>
-                 <!-- END OF SELECTED SERVICE TYPE -->
-                 </div>
+                </div>
+                <!-- END OF SELECTED SERVICE TYPE -->
 
                 <!-- SERVICENAME -->
                 <div class="form-group">
@@ -91,13 +90,12 @@
                                      data-size="s">
                         </oui-spinner>
                     </label>
-                    <oui-select
-		      disabled="OtrsPopupCtrl.loaders.services || OtrsPopupCtrl.services.length === 0"
-                      items="OtrsPopupCtrl.services"
-                      match="displayName"
-                      model="OtrsPopupCtrl.ticket.serviceName"
-                      name="select-services"
-                      searchable>
+                    <oui-select disabled="OtrsPopupCtrl.loaders.services || OtrsPopupCtrl.services.length === 0"
+                                items="OtrsPopupCtrl.services"
+                                match="displayName"
+                                model="OtrsPopupCtrl.ticket.serviceName"
+                                name="select-services"
+                                searchable>
                     </oui-select>
 
                     <small data-ng-show="OtrsPopupCtrl.productHasFaq()"
@@ -106,7 +104,8 @@
                                url: OtrsPopupCtrl.faq.url
                            }">
                     </small>
-                </div> <!-- END OF SERVICENAME -->
+                </div>
+                <!-- END OF SERVICENAME -->
 
                 <!-- TYPE -->
                 <div class="form-group"
