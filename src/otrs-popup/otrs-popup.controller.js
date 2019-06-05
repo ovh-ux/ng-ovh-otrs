@@ -115,6 +115,7 @@ export default /* @ngInject */ function (
       })
       .$promise
       .then((items) => {
+        self.ticket.serviceName = null;
         this.services = items;
         this.services.push({
           displayName: $translate.instant('otrs_service_type_other'),
