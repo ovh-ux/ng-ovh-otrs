@@ -2,6 +2,12 @@
   "name": "@ovh-ux/ng-ovh-otrs",
   "version": "7.1.4",
   "description": "Manage OTRS tickets",
+  "keywords": [
+    "angularjs",
+    "otrs",
+    "ovh",
+    "tickets"
+  ],
   "repository": "ovh-ux/ng-ovh-otrs",
   "license": "BSD-3-Clause",
   "author": "OVH SAS",
