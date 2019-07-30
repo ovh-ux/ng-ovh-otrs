@@ -1,5 +1,3 @@
-import Draggable from 'draggable';
-
 import controller from './otrs-popup.controller';
 import template from './otrs-popup.html';
 import './otrs-popup.less';
@@ -79,30 +77,6 @@ export default function () {
 
       $element.addClass('otrs-container');
       $element.addClass('initial-setting');
-
-      const dragData = {};
-      new Draggable($element[0], { // eslint-disable-line
-        handle: $element.find('#draggableTitle')[0],
-        onDragStart: (element) => {
-          // actualStartPosition is a fix to work-around
-          // the wrong initial height of the pop-up. we
-          // only need it in the first drag operation
-          delete dragData.actualStartPosition;
-          if (element.classList.contains('initial-setting')) {
-            const boundingBox = element.getBoundingClientRect();
-            dragData.actualStartPosition = { x: boundingBox.left, y: boundingBox.top };
-            element.classList.remove('initial-setting');
-          }
-        },
-        limit: (currX, currY, x0, y0) => {
-          const position = (dragData.actualStartPosition
-            ? { x: currX, y: currY - (y0 - dragData.actualStartPosition.y) }
-            : { x: currX, y: currY });
-          // Prevent pop-up to be dragged above the window
-          position.y = position.y < 0 ? 0 : position.y;
-          return position;
-        },
-      });
 
       $scope.$on('$destroy', () => {
         maximizeWatch();
