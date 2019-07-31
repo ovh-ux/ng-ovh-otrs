@@ -1,3 +1,19 @@
+# [8.0.0](https://github.com/ovh-ux/ng-ovh-otrs/compare/v7.1.7...v8.0.0) (2019-07-31)
+
+
+### Code Refactoring
+
+* **otrs-popup:** remove draggable and minor improvements ([#88](https://github.com/ovh-ux/ng-ovh-otrs/issues/88)) ([199af17](https://github.com/ovh-ux/ng-ovh-otrs/commit/199af17))
+
+
+### BREAKING CHANGES
+
+* **otrs-popup:** remove dependency to `draggable`
+
+ref: MANAGER-2710
+
+
+
 ## [7.1.7](https://github.com/ovh-ux/ng-ovh-otrs/compare/v7.1.6...v7.1.7) (2019-07-25)
 
 
