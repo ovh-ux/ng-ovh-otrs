@@ -1,3 +1,12 @@
+## [8.0.1](https://github.com/ovh-ux/ng-ovh-otrs/compare/v8.0.0...v8.0.1) (2019-07-31)
+
+
+### Bug Fixes
+
+* **popup:** remove message about dragging ([#92](https://github.com/ovh-ux/ng-ovh-otrs/issues/92)) ([9e0e749](https://github.com/ovh-ux/ng-ovh-otrs/commit/9e0e749))
+
+
+
 # [8.0.0](https://github.com/ovh-ux/ng-ovh-otrs/compare/v7.1.7...v8.0.0) (2019-07-31)
 
 
