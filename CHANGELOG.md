@@ -1,3 +1,17 @@
+# [9.0.0](https://github.com/ovh-ux/ng-ovh-otrs/compare/v8.0.2...v9.0.0) (2019-08-14)
+
+
+### Build System
+
+* bump ovh-api-services to v9.0.0 ([54ff26d](https://github.com/ovh-ux/ng-ovh-otrs/commit/54ff26d))
+
+
+### BREAKING CHANGES
+
+* bump major version of ovh-api-services
+
+
+
 ## [8.0.2](https://github.com/ovh-ux/ng-ovh-otrs/compare/v8.0.1...v8.0.2) (2019-08-14)
 
 
