@@ -1,3 +1,12 @@
+## [8.0.2](https://github.com/ovh-ux/ng-ovh-otrs/compare/v8.0.1...v8.0.2) (2019-08-14)
+
+
+### Bug Fixes
+
+* **otrs.popup:** update copy for US customers ([#99](https://github.com/ovh-ux/ng-ovh-otrs/issues/99)) ([cc0da72](https://github.com/ovh-ux/ng-ovh-otrs/commit/cc0da72))
+
+
+
 ## [8.0.1](https://github.com/ovh-ux/ng-ovh-otrs/compare/v8.0.0...v8.0.1) (2019-07-31)
 
 
