@@ -30,6 +30,7 @@
     "postversion": "git push && git push --tags"
   },
   "dependencies": {
+    "bootstrap": "^3.3.6",
     "lodash": "^4.17.15"
   },
   "devDependencies": {
