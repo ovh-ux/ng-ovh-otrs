@@ -232,7 +232,7 @@ export default /* @ngInject */ function (
     if (isSelectedChoiceDedicatedServer() && !includes(self.requests, self.intervention.request)) {
       self.requests.push(self.intervention.request);
     } else if (!isSelectedChoiceDedicatedServer()) {
-      remove(self.requests, req => self.intervention.request === req);
+      remove(self.requests, (req) => self.intervention.request === req);
       self.ticket.category = undefined;
       self.ticket.subcategory = null;
     }
@@ -402,13 +402,13 @@ export default /* @ngInject */ function (
       });
 
       this.serviceTypes = get(results, 'apiSchema.data.apis')
-        .concat(OTRS_POPUP_API_EXTRAS_ENDPOINTS.filter(extra => includes(
+        .concat(OTRS_POPUP_API_EXTRAS_ENDPOINTS.filter((extra) => includes(
           extra.region,
           coreConfig.getRegion(),
         )))
-        .filter(api => !includes(OTRS_POPUP_API_EXCLUDED.ALL
+        .filter((api) => !includes(OTRS_POPUP_API_EXCLUDED.ALL
           .concat(OTRS_POPUP_API_EXCLUDED[coreConfig.getRegion()]), api.path))
-        .map(api => ({
+        .map((api) => ({
           route: get(OTRS_POPUP_API_ALIASES, api.path, api.path),
           name: $translate.instant(`otrs_service_type_${snakeCase(api.path)}`),
         }));
