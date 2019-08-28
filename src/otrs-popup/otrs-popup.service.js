@@ -19,7 +19,7 @@ export default class OtrsPopupService {
       'open',
     ];
     angular.forEach(actions, (action) => {
-      this[action] = id => this.$rootScope.$broadcast(`otrs.popup.${action}`, id);
+      this[action] = (id) => this.$rootScope.$broadcast(`otrs.popup.${action}`, id);
     });
   }
 
